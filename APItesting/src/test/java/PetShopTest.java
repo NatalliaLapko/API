@@ -104,44 +104,85 @@ public class PetShopTest {
 
 
 
-    @Test
-    public void updatePet() {
+   @Test
+    public void deletePetByIDTest(){
+        Log.info("Delete pet");
 
         int id = 9;
+
+
+        String deleteRequest = "https://petstore.swagger.io/v2/pet/";
+        RequestSpecification request = RestAssured. given()
+                .baseUri(EndPoints.BASEURI)
+                .header("Content-Type", "application/json");
+        Response response =  request.delete( deleteRequest + id);
+try {
+    response.then()
+            .statusCode(404);
+    Log.info("The pet was deleted successfully!");
+} catch (Exception e) {
+    Log.error("The pet wasn't deleted! Error: " + e.getMessage());
+}
+
+
+    }
+
+
+
+@Test
+public Pet createPetTest(){
+    Tag tag = new Tag(123, "Good dog");
+    Category category = new Category(1, "Dog");
+   Pet pet = new Pet(5, category, "Sam", new ArrayList<>(), new ArrayList<>(Collections.singletonList(tag)),PetStatus.PENDING);
+        given().spec(rs)
+                .when()
+                .body(pet)
+                .post(EndPoints.PET)
+                .then()
+                .statusCode(200);
+
+
+        Log.info("The pet was created successfully!");
+    return pet;
+
+
+}
+
+    @Test
+    public void updatePetTest() {
+        Log.info("Update pet");
+  Pet pet = createPetTest();
+
+
+        //   int id = 9;
         Tag tag = new Tag(005, "Perside");
         String URI = "https://petstore.swagger.io/v2/pet";
+        Category category = new Category(2,"Cat");
 
 
-       JSONObject req = new JSONObject();
-        req.put("name", "Persik");
-        req .put("tags", new ArrayList<>(Collections.singletonList(tag)));
-        req.put("status", PetStatus.AVAILABLE);
+
+        pet.setName("Persik");
+        pet.setTags(Collections.singletonList(tag));
+        pet.setCategory(category);
+        pet.setStatus(PetStatus.AVAILABLE);
+
+      given().spec(rs)
+              .when()
+              .body(pet)
+              .put(EndPoints.PET)
+              .then()
+              .assertThat()
+              .statusCode(200);
 
 
-        Response response = given()
-                .when()
-                .get(URI);
-        response.prettyPeek();
+
+
 
 
 
 
 
     }
-
-@Test
-    public void deletePetByID(){
-    int id = 9;
-
-    String deleteRequest = "https://petstore.swagger.io/v2/pet/";
-    RequestSpecification request = RestAssured. given();
-    request .header("Content-Type", "application/json");
-    Response response =  request.delete( deleteRequest + id);
- 
-
-
-
-}
 
 
 }
